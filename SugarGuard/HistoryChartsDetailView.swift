@@ -93,6 +93,28 @@ struct HistoryChartsDetailView: View {
                 .background(Color(.secondarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .padding(.horizontal)
+                
+                // 医学参考标准说明
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("数据分析参考标准：")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: 4) {
+                        Text("以上达标率分类（正常：4.4-10.0 mmol/L）基于")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Link("中华医学会糖尿病学分会 (CDS) 指南", destination: URL(string: "http://www.diab.net.cn/")!)
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    }
+                    Text("注：不同人群的控制目标可能有所不同，请以您的主治医生建议为准。")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 20)
             }
         }
         .navigationTitle("统计分析")

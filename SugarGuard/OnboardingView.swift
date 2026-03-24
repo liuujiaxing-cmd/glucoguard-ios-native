@@ -41,8 +41,15 @@ struct OnboardingView: View {
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.secondary)
                             .padding()
-                        
+                            
                         Spacer()
+                        
+                        Text("免责声明：本应用提供的所有健康建议和数据分析均基于通用医疗指南，仅供日常健康管理参考，不构成专业的医疗诊断或治疗建议。使用本应用时，请务必听从专业医生的指导。")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 30)
+                            .padding(.bottom, 20)
                     }
                     .tag(0)
                     

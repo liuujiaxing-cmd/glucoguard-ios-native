@@ -8,6 +8,7 @@ struct ProfileView: View {
     @State private var notificationsEnabled = true
     @State private var targetHigh: Double = 10.0
     @State private var targetLow: Double = 4.4
+    @AppStorage("hasAgreedToAIDataSharing") private var hasAgreedToAIDataSharing = false
     
     // 药物添加状态
     @State private var showingAddMedication = false
@@ -108,6 +109,20 @@ struct ProfileView: View {
                             .multilineTextAlignment(.trailing)
                             .frame(width: 60)
                     }
+                }
+                
+                Section("隐私与安全") {
+                    Toggle("允许 AI 健康建议数据分析", isOn: $hasAgreedToAIDataSharing)
+                        .font(.subheadline)
+                    
+                    if hasAgreedToAIDataSharing {
+                        Text("开启后，您的基础身体数据和近期血糖记录将被发送至第三方提供商(DeepSeek)用于生成个性化建议。")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Link("查看隐私政策", destination: URL(string: "https://github.com/liuujiaxing-cmd/glucoguard-ios-native/blob/main/InformationAndVersion/PRIVACY_POLICY.md")!)
+                        .font(.subheadline)
                 }
                 
                 Section("关于我们") {
