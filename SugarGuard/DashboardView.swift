@@ -6,6 +6,9 @@ struct DashboardView: View {
     @State private var isAnalyzing = false
     @State private var showingMedicationSheet = false
     @State private var showingQuickLog = false // 快速记录 Sheet
+    @AppStorage("hasAgreedToAIDataSharing") private var hasAgreedToAIDataSharing = false
+    @State private var showingAIConsentAlert = false
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         NavigationStack {
@@ -87,33 +90,82 @@ struct DashboardView: View {
                             Text("AI 健康建议")
                                 .font(.headline)
                             Spacer()
-                            if isAnalyzing {
-                                ProgressView()
-                                    .tint(.white)
-                                    .controlSize(.small)
-                            } else {
-                                Button(action: refreshAdvice) {
-                                    Image(systemName: "arrow.clockwise")
-                                        .font(.caption)
-                                        .padding(6)
-                                        .background(.white.opacity(0.2))
-                                        .clipShape(Circle())
+                            if hasAgreedToAIDataSharing {
+                                if isAnalyzing {
+                                    ProgressView()
+                                        .tint(.white)
+                                        .controlSize(.small)
+                                } else {
+                                    Button(action: refreshAdvice) {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.caption)
+                                            .padding(6)
+                                            .background(.white.opacity(0.2))
+                                            .clipShape(Circle())
+                                    }
                                 }
                             }
                         }
                         .foregroundStyle(.white)
                         
-                        Text(aiAdvice)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.95))
-                            .lineSpacing(4)
+                        if hasAgreedToAIDataSharing {
+                            Text(aiAdvice)
+                                .font(.system(.body, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.95))
+                                .lineSpacing(4)
+                                
+                            // 免责声明与医学引用来源 (Apple 审核要求 1.4.1)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Divider().background(.white.opacity(0.3))
+                                Text("免责声明：本建议由第三方 AI 生成，仅供参考，不作为医疗诊断依据。如有不适请及时就医。")
+                                    .font(.caption2)
+                                    .foregroundStyle(.white.opacity(0.8))
+                                
+                                HStack(spacing: 4) {
+                                    Text("健康知识来源参考：")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white.opacity(0.8))
+                                    Button(action: {
+                                        if let url = URL(string: "https://www.who.int/zh/news-room/fact-sheets/detail/diabetes") {
+                                            openURL(url)
+                                        }
+                                    }) {
+                                        Text("世界卫生组织 (WHO)")
+                                            .font(.caption2)
+                                            .underline()
+                                            .foregroundStyle(.white)
+                                    }
+                                }
+                            }
+                            .padding(.top, 8)
+                        } else {
+                            VStack(spacing: 12) {
+                                Text("开启 AI 建议，获取专属您的个性化健康分析。")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.9))
+                                    .multilineTextAlignment(.center)
+                                
+                                Button(action: { showingAIConsentAlert = true }) {
+                                    Text("开启 AI 健康建议")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 20)
+                                        .background(.white)
+                                        .foregroundStyle(AppTheme.primary)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                        }
                     }
                     .padding()
                     .background(AppTheme.primaryGradient) // 使用渐变背景
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .shadow(color: AppTheme.primary.opacity(0.3), radius: 10, x: 0, y: 4)
                     .onAppear {
-                        if aiAdvice == "正在分析您的健康数据..." {
+                        if hasAgreedToAIDataSharing && aiAdvice == "正在分析您的健康数据..." {
                             refreshAdvice()
                         }
                     }
@@ -190,6 +242,15 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showingQuickLog) {
                 SmartLogView()
+            }
+            .alert("隐私数据共享授权", isPresented: $showingAIConsentAlert) {
+                Button("不同意", role: .cancel) { }
+                Button("同意并开启") {
+                    hasAgreedToAIDataSharing = true
+                    refreshAdvice()
+                }
+            } message: {
+                Text("为了生成个性化的健康建议，我们将把您的基本资料（年龄、性别、糖尿病类型、用药情况）和最近5次血糖记录发送至第三方 AI 服务提供商 (DeepSeek)。此数据仅用于生成单次建议，不会用于其他用途或存储。")
             }
         }
     }
