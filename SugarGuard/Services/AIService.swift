@@ -3,12 +3,15 @@ import Foundation
 class AIService {
     static let shared = AIService()
     
-    // 替换为你的真实 API Key (为了演示，这里使用模拟请求，但结构是真实的)
-    // 推荐使用 DeepSeek 或 MiniMax，性价比高
-    private let apiKey = "REMOVED_EXPOSED_API_KEY"
+    // 不在客户端代码中内置服务商密钥；配置安全凭证来源后再启用 AI。
+    private let apiKey = ""
     private let apiURL = URL(string: "https://api.deepseek.com/v1/chat/completions")!
     
     func generateHealthAdvice(records: [GlucoseRecord], profile: UserProfile) async throws -> String {
+        guard !apiKey.isEmpty else {
+            throw URLError(.userAuthenticationRequired)
+        }
+
         // 1. 构建 Prompt
         let recentRecords = records.prefix(5).map { "\($0.date.formatted()): \($0.value) \($0.type)" }.joined(separator: "; ")
         let prompt = """
